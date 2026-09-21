@@ -1,8 +1,10 @@
 .git
 .venv
+venv
 __pycache__
 .pytest_cache
 .env
 data
 tests
-
+.github
+.ruff_cache

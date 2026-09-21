@@ -59,7 +59,11 @@ def test_catalog_and_detail() -> None:
     assert detail.status_code == 200
     assert detail.json()["title"] == "Obra de prueba"
 
-    assert client.get("/").status_code == 200
+    homepage = client.get("/")
+    assert homepage.status_code == 200
+    assert "Daniela Carrión" in homepage.text
+    assert "PLVQ42obHL2u_nJgblVTpWs3NQdD_WZkAM" in homepage.text
+    assert "AGPL-3.0-or-later" in homepage.text
     html = client.get(f"/obras/{slug}")
     assert html.status_code == 200
     assert "Obra de prueba" in html.text

@@ -11,6 +11,7 @@ The application lives in `app/`. HTTP routes are grouped under `app/routes/`, Yo
 - `python -m app.cli sync-youtube` imports the configured playlist.
 - `uvicorn app.main:app --reload` runs the local development server.
 - `python -m pytest` executes the test suite.
+- `python -m pytest --cov=app --cov-fail-under=70` matches the CI coverage gate.
 - `python -m ruff check .` validates imports, style, and common errors.
 - `docker compose up --build` starts the production-shaped container locally.
 
@@ -27,3 +28,7 @@ Tests use pytest and should be named `test_*.py`. Add unit coverage for classifi
 ## Commit & Pull Request Guidelines
 
 Use short imperative subjects, preferably Conventional Commits, such as `feat: add genre filters`. Keep migrations with the model changes they support. Pull requests should describe user-visible behavior, list verification commands, mention configuration or migration changes, and include screenshots for UI work. Do not include database files, secrets, downloaded videos, or generated caches.
+
+## Licensing
+
+All contributions are distributed under `AGPL-3.0-or-later`. New source files and bundled third-party assets must be compatible with that license; document any third-party attribution when adding assets.
