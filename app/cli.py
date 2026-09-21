@@ -8,6 +8,7 @@ from argon2 import PasswordHasher
 from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.services.sync import sync_playlist
+from app.services.taxonomy import enrich_catalog
 from app.services.youtube import YouTubeClient
 
 
@@ -16,6 +17,9 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("init-db", help="Crea las tablas de la base de datos")
     subparsers.add_parser("sync-youtube", help="Sincroniza la playlist configurada")
+    subparsers.add_parser(
+        "classify-metadata", help="Completa categorías vacías sin reemplazar la edición manual"
+    )
     password_parser = subparsers.add_parser("hash-password", help="Genera un hash Argon2")
     password_parser.add_argument("password", nargs="?", help="Omítela para ingresarla en privado")
     args = parser.parse_args()
@@ -40,6 +44,10 @@ def main() -> None:
                 )
         finally:
             client.close()
+    elif args.command == "classify-metadata":
+        with SessionLocal() as session:
+            updated = enrich_catalog(session)
+            print(f"Clasificación completada: {updated} obras enriquecidas.")
 
 
 if __name__ == "__main__":

@@ -4,75 +4,90 @@
 <section class="hero">
   <div class="hero__texture" aria-hidden="true"></div>
   <div class="hero__content">
-    <p class="kicker">Archivo audiovisual abierto</p>
-    <h1>Historias de aquí,<br><em>listas para verse.</em></h1>
-    <p class="hero__copy">Películas, cortometrajes, documentales y otras miradas venezolanas reunidas en un solo catálogo.</p>
-    <a class="button button--primary" href="#catalogo">Explorar el catálogo</a>
+    <p class="kicker">Archivo audiovisual venezolano</p>
+    <h1>Historias de aquí,<br><em>para ver ahora.</em></h1>
+    <p class="hero__copy">Una selección abierta de largometrajes, cortos, documentales y otras formas de mirar el país.</p>
+    <div class="hero__actions">
+      <a class="button button--primary" href="#catalogo">Entrar al catálogo <span aria-hidden="true">↓</span></a>
+      <span>{{ facets.total }} obras disponibles</span>
+    </div>
+  </div>
+  <div class="hero__index" aria-label="Resumen de la colección">
+    <div><span>01</span><p><strong>{{ facets.types|length }}</strong> formas audiovisuales</p></div>
+    <div><span>02</span><p><strong>{{ facets.lengths|length }}</strong> duraciones</p></div>
+    <div><span>03</span><p><strong>{% if facets.years %}{{ facets.years[-1].value }}—{{ facets.years[0].value }}{% else %}Sin fecha{% endif %}</strong> período catalogado</p></div>
   </div>
   <div class="hero__flag" aria-hidden="true"><span></span><span></span><span></span></div>
 </section>
 
-<aside class="curator-credit" aria-label="Créditos de la colección">
-  <div class="curator-credit__mark" aria-hidden="true">DC</div>
-  <div>
-    <p class="kicker">Curaduría original</p>
-    <h2>Esta colección existe gracias a Daniela Carrión.</h2>
-    <p>El catálogo parte de su playlist pública <a href="https://www.youtube.com/playlist?list=PLVQ42obHL2u_nJgblVTpWs3NQdD_WZkAM" target="_blank" rel="noopener">CINE VENEZOLANO ↗</a>, creada y mantenida para reunir películas y cortometrajes disponibles en YouTube.</p>
-  </div>
-  <a class="button button--ghost" href="https://www.youtube.com/@danielacarryon" target="_blank" rel="noopener">Conocer a la curadora ↗</a>
-</aside>
-
 <section class="catalog" id="catalogo">
   <div class="section-heading">
     <div>
-      <p class="kicker">La colección</p>
-      <h2>Encuentra tu próxima película</h2>
+      <p class="section-folio">01 / Colección</p>
+      <h2>El archivo, a tu manera</h2>
     </div>
-    <p class="result-count">{{ pagination.total }} obra{% if pagination.total != 1 %}s{% endif %}</p>
+    <p class="section-intro">Busca por título o recorre la colección por formato, duración, época y tema.</p>
   </div>
 
+  <nav class="category-nav" aria-label="Tipos de obra">
+    <a href="/#catalogo" {% if not active.type %}aria-current="page"{% endif %}>Todas <span>{{ facets.total }}</span></a>
+    {% for option in facets.types %}
+      <a href="/?type={{ option.value }}#catalogo" {% if active.type == option.value %}aria-current="page"{% endif %}>{{ content_labels.get(option.value, option.value) }} <span>{{ option.count }}</span></a>
+    {% endfor %}
+  </nav>
+
   <form class="filters" method="get" action="/" aria-label="Filtros del catálogo">
-    <label class="search-field">
-      <span class="sr-only">Buscar</span>
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.15A7.5 7.5 0 1 1 4 11.5a7.5 7.5 0 0 1 15 0Z"/></svg>
-      <input type="search" name="q" value="{{ active.q or '' }}" placeholder="Buscar por título, descripción…">
-    </label>
-    <select name="type" aria-label="Tipo">
-      <option value="">Todos los tipos</option>
-      {% for option in facets.types %}
-        <option value="{{ option.value }}" {% if active.type == option.value %}selected{% endif %}>{{ content_labels.get(option.value, option.value) }} ({{ option.count }})</option>
-      {% endfor %}
-    </select>
-    <select name="length" aria-label="Duración">
-      <option value="">Toda duración</option>
-      {% for option in facets.lengths %}
-        <option value="{{ option.value }}" {% if active.length == option.value %}selected{% endif %}>{{ length_labels.get(option.value, option.value) }} ({{ option.count }})</option>
-      {% endfor %}
-    </select>
-    <select name="genre" aria-label="Género">
-      <option value="">Todos los géneros</option>
-      {% for option in facets.genres %}
-        <option value="{{ option.value }}" {% if active.genre == option.value %}selected{% endif %}>{{ option.label }} ({{ option.count }})</option>
-      {% endfor %}
-    </select>
-    <select name="year" aria-label="Año">
-      <option value="">Todos los años</option>
-      {% for option in facets.years %}
-        <option value="{{ option.value }}" {% if active.year == option.value %}selected{% endif %}>{{ option.value }} ({{ option.count }})</option>
-      {% endfor %}
-    </select>
-    <select name="sort" aria-label="Ordenar">
-      <option value="playlist" {% if active.sort == 'playlist' %}selected{% endif %}>Orden de la colección</option>
-      <option value="title" {% if active.sort == 'title' %}selected{% endif %}>Título A–Z</option>
-      <option value="year" {% if active.sort == 'year' %}selected{% endif %}>Año más reciente</option>
-    </select>
-    <button class="button button--dark" type="submit">Aplicar</button>
-    {% if active.q or active.type or active.length or active.genre or active.year %}<a class="clear-link" href="/#catalogo">Limpiar</a>{% endif %}
+    <div class="filters__lead">
+      <label class="search-field">
+        <span>Buscar en la colección</span>
+        <span class="search-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.15A7.5 7.5 0 1 1 4 11.5a7.5 7.5 0 0 1 15 0Z"/></svg>
+          <input type="search" name="q" value="{{ active.q or '' }}" placeholder="Título, tema o descripción">
+        </span>
+      </label>
+      <label class="filter-field filter-field--sort"><span>Orden</span><select name="sort">
+        <option value="playlist" {% if active.sort == 'playlist' %}selected{% endif %}>Orden de la playlist</option>
+        <option value="title" {% if active.sort == 'title' %}selected{% endif %}>Título A–Z</option>
+        <option value="year" {% if active.sort == 'year' %}selected{% endif %}>Más recientes</option>
+        <option value="year_asc" {% if active.sort == 'year_asc' %}selected{% endif %}>Más antiguas</option>
+      </select></label>
+    </div>
+    <div class="filters__grid">
+      <label class="filter-field"><span>Formato</span><select name="type">
+        <option value="">Todos</option>
+        {% for option in facets.types %}<option value="{{ option.value }}" {% if active.type == option.value %}selected{% endif %}>{{ content_labels.get(option.value, option.value) }} · {{ option.count }}</option>{% endfor %}
+      </select></label>
+      <label class="filter-field"><span>Duración</span><select name="length">
+        <option value="">Cualquier duración</option>
+        {% for option in facets.lengths %}<option value="{{ option.value }}" {% if active.length == option.value %}selected{% endif %}>{{ length_labels.get(option.value, option.value) }} · {{ option.count }}</option>{% endfor %}
+      </select></label>
+      <label class="filter-field"><span>Época</span><select name="decade">
+        <option value="">Todas las décadas</option>
+        {% for option in facets.decades %}<option value="{{ option.value }}" {% if active.decade == option.value %}selected{% endif %}>{{ option.label }} · {{ option.count }}</option>{% endfor %}
+      </select></label>
+      {% if facets.genres %}<label class="filter-field"><span>Género</span><select name="genre">
+        <option value="">Todos los géneros</option>
+        {% for option in facets.genres %}<option value="{{ option.value }}" {% if active.genre == option.value %}selected{% endif %}>{{ option.label }} · {{ option.count }}</option>{% endfor %}
+      </select></label>{% endif %}
+      {% if facets.tags %}<label class="filter-field"><span>Tema</span><select name="tag">
+        <option value="">Todos los temas</option>
+        {% for option in facets.tags %}<option value="{{ option.value }}" {% if active.tag == option.value %}selected{% endif %}>{{ option.label }} · {{ option.count }}</option>{% endfor %}
+      </select></label>{% endif %}
+      <button class="button button--dark" type="submit">Ver resultados</button>
+    </div>
   </form>
+
+  <div class="results-bar">
+    <p><strong>{{ pagination.total }}</strong> obra{% if pagination.total != 1 %}s{% endif %} encontrada{% if pagination.total != 1 %}s{% endif %}</p>
+    {% if active_filters %}<div class="active-filters" aria-label="Filtros activos">
+      {% for filter in active_filters %}<a href="{{ filter.url }}#catalogo">{{ filter.label }} <span aria-hidden="true">×</span></a>{% endfor %}
+      <a class="active-filters__clear" href="/#catalogo">Limpiar todo</a>
+    </div>{% endif %}
+  </div>
 
   {% if works %}
     <div class="film-grid">
-      {% for item in works %}{% include "_card.html" %}{% endfor %}
+      {% for item in works %}{% set card_index = loop.index %}{% include "_card.html" %}{% endfor %}
     </div>
     {% if pagination.pages > 1 %}
       <nav class="pagination" aria-label="Páginas">
@@ -85,7 +100,7 @@
     <div class="empty-state">
       <span class="empty-state__reel">◎</span>
       <h3>Aún no hay obras que mostrar</h3>
-      {% if active.q or active.type or active.length or active.genre or active.year %}
+      {% if active_filters %}
         <p>Prueba cambiando los filtros o <a href="/#catalogo">consulta el catálogo completo</a>.</p>
       {% else %}
         <p>Configura la clave de YouTube y ejecuta la primera sincronización.</p>

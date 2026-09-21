@@ -13,10 +13,41 @@ CONTENT_LABELS = {
 }
 
 LENGTH_LABELS = {
-    "short": "Corta duración",
-    "medium": "Media duración",
+    "short": "Cortometraje",
+    "medium": "Mediometraje",
     "feature": "Largometraje",
     "unknown": "Duración desconocida",
+}
+
+GENRE_RULES = {
+    "Drama": ("drama", "dramático", "dramatico"),
+    "Comedia": ("comedia", "comedy", "humor", "sátira", "satira", "sketch"),
+    "Terror": ("terror", "horror", "sobrenatural", "maldición", "maldicion", "fantasma"),
+    "Acción": ("película de acción", "pelicula de accion", "action movie", "adrenalina"),
+    "Crimen": ("crimen", "criminal", "delincuente", "secuestro", "narcotráfico", "narcotrafico"),
+    "Romance": ("romance", "romántica", "romantica", "historia de amor"),
+    "Ciencia ficción": ("ciencia ficción", "ciencia ficcion", "sci-fi", "distopía", "distopia"),
+    "Experimental": ("experimental", "videoarte", "video arte", "ensayo audiovisual"),
+    "Biográfico": (
+        "biográfico",
+        "biografico",
+        "biopic",
+        "basada en la vida",
+        "based on a true story",
+    ),
+}
+
+TAG_RULES = {
+    "Caracas": ("caracas",),
+    "Memoria": ("memoria", "recuerdos", "archivo familiar", "videos de archivo"),
+    "Identidad": ("identidad", "pertenencia", "raíces", "raices"),
+    "Migración": ("migración", "migracion", "migrante", "diáspora", "diaspora", "exilio"),
+    "Música y baile": ("música", "musica", "baile", "danza", "raptor house", "tuki"),
+    "Política": ("dictadura", "política", "politica", "protesta", "presidente", "revolución"),
+    "Diversidad": ("queer", "lgbt", "transgénero", "transgenero", "homosexual"),
+    "Infancia y juventud": ("infancia", "niño", "niña", "adolescente", "juventud"),
+    "Deporte": ("boxeo", "boxeador", "fútbol", "futbol", "deporte", "atleta"),
+    "Naturaleza": ("naturaleza", "el ávila", "el avila", "selva", "ecológico", "ecologico"),
 }
 
 
@@ -36,7 +67,7 @@ def classify_length(seconds: int | None) -> str:
 
 
 def infer_content_type(title: str, description: str = "") -> str:
-    text = f"{title} {description}".lower()
+    text = f"{title} {description[:700]}".lower()
     if any(word in text for word in ("documental", "documentary", "docu ")):
         return "documentary"
     if any(word in text for word in ("animación", "animacion", "animated", "stop motion")):
@@ -46,10 +77,30 @@ def infer_content_type(title: str, description: str = "") -> str:
     if any(word in text for word in ("video oficial", "official music video", "videoclip")):
         return "music_video"
     if any(
-        word in text for word in ("película", "pelicula", "cortometraje", "short film", "shortfilm")
+        word in text
+        for word in (
+            "película",
+            "pelicula",
+            "cortometraje",
+            "corto venezolano",
+            "short film",
+            "shortfilm",
+            "full movie",
+            "largometraje",
+        )
     ):
         return "fiction"
     return "other"
+
+
+def infer_genres(title: str, description: str = "") -> list[str]:
+    text = f"{title} {description[:700]}".lower()
+    return [name for name, terms in GENRE_RULES.items() if any(term in text for term in terms)]
+
+
+def infer_tags(title: str, description: str = "") -> list[str]:
+    text = f"{title} {description[:900]}".lower()
+    return [name for name, terms in TAG_RULES.items() if any(term in text for term in terms)]
 
 
 def infer_year(title: str) -> int | None:

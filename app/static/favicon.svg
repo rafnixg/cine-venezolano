@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" fill="#12100e"/>
+  <path d="M0 0h64v6H0z" fill="#f4c64e"/>
+  <path d="M0 6h64v6H0z" fill="#244f8f"/>
+  <path d="M0 12h64v6H0z" fill="#c83c32"/>
+  <text x="32" y="48" fill="#fffaf0" font-family="Georgia,serif" font-size="28" text-anchor="middle">CV</text>
+</svg>

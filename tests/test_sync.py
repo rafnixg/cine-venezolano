@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.database import Base
-from app.models import Work
+from app.models import Genre, Work
 from app.services.sync import sync_playlist
+from app.services.taxonomy import enrich_catalog
 from app.services.youtube import YouTubeItem
 
 
@@ -56,6 +57,7 @@ def test_sync_creates_and_updates_without_overwriting_editorial_data() -> None:
         assert work.title == "Corto venezolano (2024)"
         assert work.year == 2024
         assert work.length_category == "short"
+        assert [genre.name for genre in work.genres] == ["Drama"]
         work.title_override = "Título curado"
         work.needs_review = False
         session.commit()
@@ -79,3 +81,20 @@ def test_missing_item_is_hidden_not_deleted() -> None:
         assert old is not None
         assert not old.is_published
         assert not old.is_in_playlist
+
+
+def test_catalog_enrichment_reuses_taxonomy_entities() -> None:
+    with make_session() as session:
+        sync_playlist(
+            session,
+            FakeYouTubeClient(
+                [
+                    item("abc12345678", "Drama venezolano"),
+                    item("zyx12345678", "Otro drama venezolano"),
+                ]
+            ),
+            "playlist",
+        )
+        assert enrich_catalog(session) == 0
+        assert session.scalar(select(Genre).where(Genre.slug == "drama")) is not None
+        assert len(session.scalars(select(Genre).where(Genre.slug == "drama")).all()) == 1

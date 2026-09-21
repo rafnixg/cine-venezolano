@@ -79,7 +79,7 @@
 {% if related %}
 <section class="related">
   <div class="section-heading"><div><p class="kicker">Sigue explorando</p><h2>También podría interesarte</h2></div></div>
-  <div class="film-grid film-grid--four">{% for item in related %}{% include "_card.html" %}{% endfor %}</div>
+  <div class="film-grid film-grid--four">{% for item in related %}{% set card_index = loop.index %}{% include "_card.html" %}{% endfor %}</div>
 </section>
 {% endif %}
 {% endblock %}

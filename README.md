@@ -73,6 +73,7 @@ la versión correspondiente, por ejemplo `1.2.0` y `1.2` para `v1.2.0`.
 
 - `python -m app.cli init-db`: crea tablas para desarrollo rápido.
 - `python -m app.cli sync-youtube`: importa o actualiza toda la playlist.
+- `python -m app.cli classify-metadata`: completa categorías vacías sin reemplazar la edición manual.
 - `python -m pytest`: ejecuta las pruebas.
 - `python -m ruff check .`: valida estilo y errores estáticos.
 - `alembic upgrade head`: aplica migraciones pendientes.
@@ -85,7 +86,7 @@ La sincronización automática corre cada domingo a las 03:00 en `America/Caraca
 
 ## API pública
 
-- `GET /api/v1/works`: catálogo paginado; acepta `q`, `type`, `length`, `genre`, `tag`, `year`, `sort`, `page` y `page_size`.
+- `GET /api/v1/works`: catálogo paginado; acepta `q`, `type`, `length`, `genre`, `tag`, `year`, `decade`, `sort`, `page` y `page_size`.
 - `GET /api/v1/works/{slug}`: ficha completa.
 - `GET /api/v1/facets`: valores y conteos disponibles para filtros.
 - `GET /api/v1/health`: comprobación básica del servicio.

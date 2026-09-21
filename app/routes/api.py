@@ -21,6 +21,13 @@ def _optional_year(value: str | None) -> int | None:
     return int(cleaned)
 
 
+def _optional_decade(value: str | None) -> int | None:
+    parsed = _optional_year(value)
+    if parsed is not None and (parsed < 1890 or parsed > 2100 or parsed % 10):
+        raise HTTPException(status_code=422, detail="La década debe ser un múltiplo de diez")
+    return parsed
+
+
 @router.get("/works")
 def api_works(
     q: str | None = None,
@@ -29,9 +36,10 @@ def api_works(
     genre: str | None = None,
     tag: str | None = None,
     year: str | None = None,
+    decade: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(24, ge=1, le=100),
-    sort: str = Query("playlist", pattern="^(playlist|title|year)$"),
+    sort: str = Query("playlist", pattern="^(playlist|title|year|year_asc)$"),
     db: Session = Depends(get_db),
 ) -> dict[str, object]:
     result = list_works(
@@ -42,6 +50,7 @@ def api_works(
         genre=genre,
         tag=tag,
         year=_optional_year(year),
+        decade=_optional_decade(decade),
         page=page,
         page_size=page_size,
         sort=sort,

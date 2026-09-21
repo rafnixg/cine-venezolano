@@ -6,6 +6,7 @@ from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models import Genre, Tag, Work, YouTubeSource
+from app.services.classifier import CONTENT_LABELS, LENGTH_LABELS
 
 
 @dataclass
@@ -42,6 +43,7 @@ def list_works(
     genre: str | None = None,
     tag: str | None = None,
     year: int | None = None,
+    decade: int | None = None,
     page: int = 1,
     page_size: int = 24,
     sort: str = "playlist",
@@ -67,6 +69,8 @@ def list_works(
         query = query.where(Work.length_category == length)
     if year:
         query = query.where(Work.year == year)
+    if decade:
+        query = query.where(Work.year >= decade, Work.year < decade + 10)
     if genre:
         query = query.join(Work.genres).where(Genre.slug == genre)
     if tag:
@@ -81,6 +85,8 @@ def list_works(
         query = query.order_by(func.coalesce(Work.title_override, YouTubeSource.title).asc())
     elif sort == "year":
         query = query.order_by(Work.year.desc().nullslast(), Work.id.desc())
+    elif sort == "year_asc":
+        query = query.order_by(Work.year.asc().nulls_last(), Work.id.asc())
     else:
         if not source_joined:
             query = query.outerjoin(YouTubeSource)
@@ -95,7 +101,7 @@ def list_works(
     return WorkPage(items=list(items), total=total, page=page, page_size=page_size)
 
 
-def facets(session: Session) -> dict[str, list[dict[str, object]]]:
+def facets(session: Session) -> dict[str, object]:
     public_filters = (
         Work.is_published.is_(True),
         Work.is_available.is_(True),
@@ -113,6 +119,10 @@ def facets(session: Session) -> dict[str, list[dict[str, object]]]:
         .group_by(Work.length_category)
         .order_by(Work.length_category)
     ).all()
+    type_order = {value: index for index, value in enumerate(CONTENT_LABELS)}
+    length_order = {value: index for index, value in enumerate(LENGTH_LABELS)}
+    types.sort(key=lambda item: type_order.get(item[0], len(type_order)))
+    lengths.sort(key=lambda item: length_order.get(item[0], len(length_order)))
     genres = session.execute(
         select(Genre.slug, Genre.name, func.count(Work.id))
         .join(Genre.works)
@@ -120,15 +130,32 @@ def facets(session: Session) -> dict[str, list[dict[str, object]]]:
         .group_by(Genre.id)
         .order_by(Genre.name)
     ).all()
+    tags = session.execute(
+        select(Tag.slug, Tag.name, func.count(Work.id))
+        .join(Tag.works)
+        .where(*public_filters)
+        .group_by(Tag.id)
+        .order_by(func.count(Work.id).desc(), Tag.name)
+    ).all()
     years = session.execute(
         select(Work.year, func.count(Work.id))
         .where(*public_filters, Work.year.is_not(None))
         .group_by(Work.year)
         .order_by(Work.year.desc())
     ).all()
+    decade_counts: dict[int, int] = {}
+    for value, count in years:
+        decade = (value // 10) * 10
+        decade_counts[decade] = decade_counts.get(decade, 0) + count
     return {
+        "total": sum(count for _, count in types),
         "types": [{"value": value, "count": count} for value, count in types],
         "lengths": [{"value": value, "count": count} for value, count in lengths],
         "genres": [{"value": slug, "label": name, "count": count} for slug, name, count in genres],
+        "tags": [{"value": slug, "label": name, "count": count} for slug, name, count in tags],
         "years": [{"value": value, "count": count} for value, count in years],
+        "decades": [
+            {"value": value, "label": f"Años {value}", "count": count}
+            for value, count in sorted(decade_counts.items(), reverse=True)
+        ],
     }

@@ -27,6 +27,13 @@ def _optional_year(value: str | None) -> int | None:
     return int(cleaned)
 
 
+def _optional_decade(value: str | None) -> int | None:
+    parsed = _optional_year(value)
+    if parsed is not None and (parsed < 1890 or parsed > 2100 or parsed % 10):
+        raise HTTPException(status_code=422, detail="La década debe ser un múltiplo de diez")
+    return parsed
+
+
 @router.get("/", response_class=HTMLResponse)
 def home(
     request: Request,
@@ -34,20 +41,25 @@ def home(
     type: str | None = None,
     length: str | None = None,
     genre: str | None = None,
+    tag: str | None = None,
     year: str | None = None,
+    decade: str | None = None,
     page: int = 1,
     sort: str = "playlist",
     db: Session = Depends(get_db),
 ) -> HTMLResponse:
     parsed_year = _optional_year(year)
-    safe_sort = sort if sort in {"playlist", "title", "year"} else "playlist"
+    parsed_decade = _optional_decade(decade)
+    safe_sort = sort if sort in {"playlist", "title", "year", "year_asc"} else "playlist"
     result = list_works(
         db,
         q=q,
         content_type=type,
         length=length,
         genre=genre,
+        tag=tag,
         year=parsed_year,
+        decade=parsed_decade,
         page=page,
         sort=safe_sort,
     )
@@ -56,9 +68,33 @@ def home(
         "type": type or None,
         "length": length or None,
         "genre": genre or None,
+        "tag": tag or None,
         "year": parsed_year,
+        "decade": parsed_decade,
         "sort": safe_sort,
     }
+    facet_data = facets(db)
+    label_maps = {
+        "type": CONTENT_LABELS,
+        "length": LENGTH_LABELS,
+        "genre": {item["value"]: item["label"] for item in facet_data["genres"]},
+        "tag": {item["value"]: item["label"] for item in facet_data["tags"]},
+        "decade": {item["value"]: item["label"] for item in facet_data["decades"]},
+    }
+    active_filters = []
+    for key in ("q", "type", "length", "genre", "tag", "decade", "year"):
+        value = active.get(key)
+        if value is None or value == "":
+            continue
+        label = f'“{value}”' if key == "q" else label_maps.get(key, {}).get(value, value)
+        remaining = {
+            name: current
+            for name, current in active.items()
+            if name != key and current is not None and current != ""
+        }
+        active_filters.append(
+            {"label": str(label), "url": f"/?{urlencode(remaining)}" if remaining else "/"}
+        )
     pagination_query = urlencode(
         {
             key: value
@@ -72,8 +108,9 @@ def home(
         {
             "works": [work_dict(work) for work in result.items],
             "pagination": result,
-            "facets": facets(db),
+            "facets": facet_data,
             "active": active,
+            "active_filters": active_filters,
             "content_labels": CONTENT_LABELS,
             "length_labels": LENGTH_LABELS,
             "pagination_query": pagination_query,

@@ -5,7 +5,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
-from app.models import Work, YouTubeSource
+from app.models import Genre, Tag, Work, YouTubeSource
 
 engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
 Base.metadata.create_all(engine)
@@ -31,6 +31,7 @@ def setup_function() -> None:
             content_type="fiction",
             length_category="short",
             runtime_seconds=600,
+            year=2024,
             is_published=True,
             is_available=True,
             is_in_playlist=True,
@@ -42,6 +43,8 @@ def setup_function() -> None:
             embeddable=True,
             playlist_position=0,
         )
+        work.genres = [Genre(name="Drama", slug="drama")]
+        work.tags = [Tag(name="Caracas", slug="caracas")]
         session.add(work)
         session.commit()
 
@@ -51,7 +54,7 @@ def test_health() -> None:
 
 
 def test_application_version() -> None:
-    assert client.get("/openapi.json").json()["info"]["version"] == "0.0.1"
+    assert client.get("/openapi.json").json()["info"]["version"] == "0.0.2"
 
 
 def test_catalog_and_detail() -> None:
@@ -68,6 +71,9 @@ def test_catalog_and_detail() -> None:
     assert "Daniela Carrión" in homepage.text
     assert "PLVQ42obHL2u_nJgblVTpWs3NQdD_WZkAM" in homepage.text
     assert "AGPL-3.0-or-later" in homepage.text
+    assert "Curaduría original" not in homepage.text
+    assert 'href="/docs"' not in homepage.text
+    assert "Años 2020" in homepage.text
     html = client.get(f"/obras/{slug}")
     assert html.status_code == 200
     assert "Obra de prueba" in html.text
@@ -122,3 +128,14 @@ def test_invalid_year_has_clear_validation_error() -> None:
     response = client.get("/?year=no-es-un-año")
     assert response.status_code == 422
     assert response.json()["detail"] == "El año debe ser un número entero"
+
+
+def test_decade_genre_and_tag_filters() -> None:
+    assert client.get("/?decade=2020&genre=drama&tag=caracas").status_code == 200
+    assert client.get("/api/v1/works?decade=2020&genre=drama&tag=caracas").json()[
+        "pagination"
+    ]["total"] == 1
+    assert client.get("/api/v1/works?decade=2010").json()["pagination"]["total"] == 0
+    invalid = client.get("/?decade=2024")
+    assert invalid.status_code == 422
+    assert invalid.json()["detail"] == "La década debe ser un múltiplo de diez"

@@ -1,6 +1,8 @@
 from app.services.classifier import (
     classify_length,
     infer_content_type,
+    infer_genres,
+    infer_tags,
     infer_year,
     parse_iso_duration,
     slugify,
@@ -30,6 +32,17 @@ def test_conservative_content_inference() -> None:
     assert infer_content_type("De Mí (Video Oficial)") == "music_video"
     assert infer_content_type("Una película venezolana") == "fiction"
     assert infer_content_type("Guasare") == "other"
+
+
+def test_taxonomy_inference_can_assign_multiple_facets() -> None:
+    text = "Drama biográfico sobre un boxeador queer que creció en Caracas"
+    assert infer_genres("El campeón", text) == ["Drama", "Biográfico"]
+    assert infer_tags("El campeón", text) == ["Caracas", "Diversidad", "Deporte"]
+
+
+def test_taxonomy_ignores_distant_channel_boilerplate() -> None:
+    description = "Retrato de una mujer venezolana." + (" " * 800) + "Canal de terror y crimen."
+    assert infer_genres("Una vida", description) == []
 
 
 def test_year_inference() -> None:

@@ -13,6 +13,7 @@ from app.services.classifier import (
     parse_iso_duration,
     slugify,
 )
+from app.services.taxonomy import enrich_work
 from app.services.youtube import YouTubeClient, YouTubeItem, best_thumbnail
 
 
@@ -78,6 +79,7 @@ def _upsert_item(session: Session, item: YouTubeItem, now: datetime) -> bool:
     source.privacy_status = status.get("privacyStatus")
     source.view_count = int(stats["viewCount"]) if stats.get("viewCount") else None
     source.fetched_at = now
+    enrich_work(session, work, title, description)
     return is_new
 
 
