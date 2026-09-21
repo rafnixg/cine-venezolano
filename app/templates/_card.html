@@ -1,0 +1,16 @@
+<article class="film-card">
+  <a href="/obras/{{ item.slug }}" class="film-card__image">
+    <img src="{{ item.thumbnail_url }}" alt="Miniatura de {{ item.title }}" loading="lazy" width="480" height="270">
+    <span class="duration">{{ item.runtime_label }}</span>
+  </a>
+  <div class="film-card__body">
+    <div class="eyebrow">{{ item.content_type_label }}{% if item.year %} · {{ item.year }}{% endif %}</div>
+    <h3><a href="/obras/{{ item.slug }}">{{ item.title }}</a></h3>
+    {% if item.genres %}
+      <div class="tags" aria-label="Géneros">
+        {% for genre in item.genres[:3] %}<span>{{ genre.name }}</span>{% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</article>
+

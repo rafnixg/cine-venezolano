@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Administración — Cine Venezolano{% endblock %}
+{% block content %}
+<section class="admin-login">
+  <form class="panel compact-form" method="post">
+    <p class="kicker">Área privada</p>
+    <h1>Administración</h1>
+    {% if not configured %}<p class="notice notice--warning">Configura <code>ADMIN_PASSWORD_HASH</code> antes de iniciar sesión.</p>{% endif %}
+    {% if error %}<p class="notice notice--error">{{ error }}</p>{% endif %}
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <label>Contraseña<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="button button--primary" type="submit">Entrar</button>
+  </form>
+</section>
+{% endblock %}
+

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Cine Venezolano — Catálogo abierto{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero__texture" aria-hidden="true"></div>
+  <div class="hero__content">
+    <p class="kicker">Archivo audiovisual abierto</p>
+    <h1>Historias de aquí,<br><em>listas para verse.</em></h1>
+    <p class="hero__copy">Películas, cortometrajes, documentales y otras miradas venezolanas reunidas en un solo catálogo.</p>
+    <a class="button button--primary" href="#catalogo">Explorar el catálogo</a>
+  </div>
+  <div class="hero__flag" aria-hidden="true"><span></span><span></span><span></span></div>
+</section>
+
+<section class="catalog" id="catalogo">
+  <div class="section-heading">
+    <div>
+      <p class="kicker">La colección</p>
+      <h2>Encuentra tu próxima película</h2>
+    </div>
+    <p class="result-count">{{ pagination.total }} obra{% if pagination.total != 1 %}s{% endif %}</p>
+  </div>
+
+  <form class="filters" method="get" action="/" aria-label="Filtros del catálogo">
+    <label class="search-field">
+      <span class="sr-only">Buscar</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.15A7.5 7.5 0 1 1 4 11.5a7.5 7.5 0 0 1 15 0Z"/></svg>
+      <input type="search" name="q" value="{{ active.q or '' }}" placeholder="Buscar por título, descripción…">
+    </label>
+    <select name="type" aria-label="Tipo">
+      <option value="">Todos los tipos</option>
+      {% for option in facets.types %}
+        <option value="{{ option.value }}" {% if active.type == option.value %}selected{% endif %}>{{ content_labels.get(option.value, option.value) }} ({{ option.count }})</option>
+      {% endfor %}
+    </select>
+    <select name="length" aria-label="Duración">
+      <option value="">Toda duración</option>
+      {% for option in facets.lengths %}
+        <option value="{{ option.value }}" {% if active.length == option.value %}selected{% endif %}>{{ length_labels.get(option.value, option.value) }} ({{ option.count }})</option>
+      {% endfor %}
+    </select>
+    <select name="genre" aria-label="Género">
+      <option value="">Todos los géneros</option>
+      {% for option in facets.genres %}
+        <option value="{{ option.value }}" {% if active.genre == option.value %}selected{% endif %}>{{ option.label }} ({{ option.count }})</option>
+      {% endfor %}
+    </select>
+    <select name="year" aria-label="Año">
+      <option value="">Todos los años</option>
+      {% for option in facets.years %}
+        <option value="{{ option.value }}" {% if active.year == option.value %}selected{% endif %}>{{ option.value }} ({{ option.count }})</option>
+      {% endfor %}
+    </select>
+    <select name="sort" aria-label="Ordenar">
+      <option value="playlist" {% if active.sort == 'playlist' %}selected{% endif %}>Orden de la colección</option>
+      <option value="title" {% if active.sort == 'title' %}selected{% endif %}>Título A–Z</option>
+      <option value="year" {% if active.sort == 'year' %}selected{% endif %}>Año más reciente</option>
+    </select>
+    <button class="button button--dark" type="submit">Aplicar</button>
+    {% if active.q or active.type or active.length or active.genre or active.year %}<a class="clear-link" href="/#catalogo">Limpiar</a>{% endif %}
+  </form>
+
+  {% if works %}
+    <div class="film-grid">
+      {% for item in works %}{% include "_card.html" %}{% endfor %}
+    </div>
+    {% if pagination.pages > 1 %}
+      <nav class="pagination" aria-label="Páginas">
+        {% if pagination.page > 1 %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ pagination.page - 1 }}#catalogo">← Anterior</a>{% endif %}
+        <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+        {% if pagination.page < pagination.pages %}<a href="?{{ pagination_query }}{% if pagination_query %}&{% endif %}page={{ pagination.page + 1 }}#catalogo">Siguiente →</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-state__reel">◎</span>
+      <h3>Aún no hay obras que mostrar</h3>
+      {% if active.q or active.type or active.length or active.genre or active.year %}
+        <p>Prueba cambiando los filtros o <a href="/#catalogo">consulta el catálogo completo</a>.</p>
+      {% else %}
+        <p>Configura la clave de YouTube y ejecuta la primera sincronización.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

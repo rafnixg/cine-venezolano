@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Editar {{ work.title }} — Administración{% endblock %}
+{% block content %}
+<section class="admin-wrap admin-edit">
+  <a class="back-link" href="/admin">← Volver al panel</a>
+  <div class="admin-heading"><div><p class="kicker">Ficha editorial</p><h1>{{ work.title }}</h1></div><a class="button button--ghost" href="/obras/{{ work.slug }}" target="_blank">Ver ficha ↗</a></div>
+  {% if request.query_params.get('saved') %}<p class="notice notice--success">Cambios guardados.</p>{% endif %}
+  <form class="panel edit-form" method="post">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <div class="source-note"><strong>Fuente:</strong> {{ work.source.title if work.source else work.youtube_id }}. Los campos editoriales no son sobrescritos por YouTube.</div>
+    <div class="form-grid">
+      <label>Título editorial<input name="title" value="{{ work.title_override or '' }}" placeholder="{{ work.source.title if work.source else '' }}"></label>
+      <label>Título original<input name="original_title" value="{{ work.original_title or '' }}"></label>
+      <label class="full">Sinopsis<textarea name="synopsis" rows="5">{{ work.synopsis or '' }}</textarea></label>
+      <label>Año<input name="year" inputmode="numeric" value="{{ work.year or '' }}"></label>
+      <label>País<input name="country" value="{{ work.country }}"></label>
+      <label>Idioma<input name="language" value="{{ work.language or '' }}"></label>
+      <label>Subtítulos<input name="subtitles" value="{{ work.subtitles or '' }}"></label>
+      <label>Tipo<select name="content_type">{% for value, label in content_labels.items() %}<option value="{{ value }}" {% if work.content_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label>Duración<select name="length_category">{% for value, label in length_labels.items() %}<option value="{{ value }}" {% if work.length_category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+      <label class="full">Géneros <small>separados por comas</small><input name="genres" value="{{ work.genres|map(attribute='name')|join(', ') }}"></label>
+      <label class="full">Etiquetas <small>separadas por comas</small><input name="tags" value="{{ work.tags|map(attribute='name')|join(', ') }}"></label>
+      <label class="full">Dirección <small>nombres separados por comas</small><input name="directors" value="{{ work.credits|selectattr('role', 'equalto', 'Dirección')|map(attribute='name')|join(', ') }}"></label>
+      <label class="full">Reparto <small>nombres separados por comas</small><input name="cast" value="{{ work.credits|selectattr('role', 'equalto', 'Reparto')|map(attribute='name')|join(', ') }}"></label>
+    </div>
+    <div class="checkboxes">
+      <label><input type="checkbox" name="is_published" {% if work.is_published %}checked{% endif %}> Publicada</label>
+      <label><input type="checkbox" name="reviewed" {% if not work.needs_review %}checked{% endif %}> Revisión completada</label>
+    </div>
+    <button class="button button--primary" type="submit">Guardar cambios</button>
+  </form>
+</section>
+{% endblock %}
+

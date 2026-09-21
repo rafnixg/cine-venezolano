@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ work.title }} — Cine Venezolano{% endblock %}
+{% block content %}
+<article class="detail">
+  <nav class="breadcrumbs" aria-label="Ruta de navegación">
+    <a href="/">Catálogo</a><span aria-hidden="true">/</span><span>{{ work.title }}</span>
+  </nav>
+  <section class="cinema-hero" data-player data-video-id="{{ work.youtube_id }}" aria-label="Presentación de {{ work.title }}">
+    <img class="cinema-hero__image" src="{{ work.thumbnail_url }}" alt="" width="1280" height="720">
+    <div class="cinema-hero__shade" aria-hidden="true"></div>
+    <div class="cinema-hero__content">
+      <div class="cinema-hero__labels">
+        <span>{{ work.content_type_label }}</span>
+        {% if work.year %}<span>{{ work.year }}</span>{% endif %}
+        <span>{{ work.runtime_label }}</span>
+        <span>{{ work.country }}</span>
+      </div>
+      <h1>{{ work.title }}</h1>
+      {% if work.original_title %}<p class="original-title">{{ work.original_title }}</p>{% endif %}
+      <div class="cinema-hero__actions">
+        {% if work.embeddable %}
+          <button class="button hero-play" type="button" data-play aria-label="Reproducir {{ work.title }}"><span aria-hidden="true">▶</span> Reproducir ahora</button>
+        {% else %}
+          <a class="button hero-play" href="{{ work.youtube_url }}" target="_blank" rel="noopener"><span aria-hidden="true">↗</span> Ver en YouTube</a>
+        {% endif %}
+        <a class="button hero-secondary" href="#informacion">Conocer la obra ↓</a>
+      </div>
+      <p class="cinema-hero__source">Video alojado en YouTube</p>
+    </div>
+  </section>
+  <div class="detail__grid">
+    <div class="detail-copy" id="informacion">
+      <div class="section-number" aria-hidden="true">01</div>
+      <p class="kicker">La historia</p>
+      <h2>Sobre la obra</h2>
+      <p class="synopsis">{{ work.synopsis or work.description_excerpt or 'Esta ficha está pendiente de curaduría editorial.' }}</p>
+      {% if work.description and work.description != work.synopsis %}
+        <details class="original-description">
+          <summary>Leer la descripción original de YouTube</summary>
+          <div>{{ work.description }}</div>
+        </details>
+      {% endif %}
+      <div class="detail-actions">
+        <a class="button youtube-button" href="{{ work.youtube_url }}" target="_blank" rel="noopener"><span aria-hidden="true">▶</span> Ver en YouTube</a>
+        <button class="button button--ghost" type="button" data-copy-link>Copiar enlace</button>
+      </div>
+      <div class="source-card">
+        <span class="source-card__mark" aria-hidden="true">YT</span>
+        <div>
+          <small>Fuente del video</small>
+          {% if work.channel_url %}<a href="{{ work.channel_url }}" target="_blank" rel="noopener">{{ work.channel_title or 'Canal de YouTube' }} ↗</a>{% else %}<strong>{{ work.channel_title or 'YouTube' }}</strong>{% endif %}
+          {% if work.published_label %}<time>Publicado el {{ work.published_label }}</time>{% endif %}
+        </div>
+      </div>
+    </div>
+    <aside class="facts" aria-label="Ficha técnica">
+      <div class="facts__heading"><span>Ficha técnica</span><span aria-hidden="true">✦</span></div>
+      <dl>
+        {% if work.year %}<div><dt>Año</dt><dd>{{ work.year }}</dd></div>{% endif %}
+        <div><dt>Duración</dt><dd>{{ work.runtime_label }}</dd></div>
+        <div><dt>Tipo</dt><dd>{{ work.content_type_label }}</dd></div>
+        <div><dt>Formato</dt><dd>{{ work.length_label }}</dd></div>
+        <div><dt>País</dt><dd>{{ work.country }}</dd></div>
+        {% if work.language %}<div><dt>Idioma</dt><dd>{{ work.language }}</dd></div>{% endif %}
+        {% if work.subtitles %}<div><dt>Subtítulos</dt><dd>{{ work.subtitles }}</dd></div>{% endif %}
+      </dl>
+      {% if work.credits %}
+        <dl class="credits">{% for credit in work.credits %}<div><dt>{{ credit.role }}</dt><dd>{{ credit.name }}</dd></div>{% endfor %}</dl>
+      {% endif %}
+      {% if work.genres or work.tags %}
+        <div class="facts__taxonomy">
+          <small>Géneros y temas</small>
+          <div class="tags">{% for genre in work.genres %}<span>{{ genre.name }}</span>{% endfor %}{% for tag in work.tags %}<span>{{ tag.name }}</span>{% endfor %}</div>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</article>
+{% if related %}
+<section class="related">
+  <div class="section-heading"><div><p class="kicker">Sigue explorando</p><h2>También podría interesarte</h2></div></div>
+  <div class="film-grid film-grid--four">{% for item in related %}{% include "_card.html" %}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}
