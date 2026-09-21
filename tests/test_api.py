@@ -50,6 +50,10 @@ def test_health() -> None:
     assert client.get("/api/v1/health").json() == {"status": "ok"}
 
 
+def test_application_version() -> None:
+    assert client.get("/openapi.json").json()["info"]["version"] == "0.0.1"
+
+
 def test_catalog_and_detail() -> None:
     response = client.get("/api/v1/works?q=prueba")
     assert response.status_code == 200
