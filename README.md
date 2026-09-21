@@ -59,6 +59,16 @@ docker compose exec web python -m app.cli sync-youtube
 
 SQLite se guarda en el volumen `cine_data`. El contenedor aplica migraciones al iniciar.
 
+La imagen verificada de cada cambio en `main` se publica en GitHub Container Registry:
+
+```powershell
+docker pull ghcr.io/rafnixg/cine-venezolano:latest
+docker run --rm -p 8000:8000 ghcr.io/rafnixg/cine-venezolano:latest
+```
+
+También se generan etiquetas inmutables `sha-<commit>`. Los tags Git `v*` publican además
+la versión correspondiente, por ejemplo `1.2.0` y `1.2` para `v1.2.0`.
+
 ## Comandos
 
 - `python -m app.cli init-db`: crea tablas para desarrollo rápido.
