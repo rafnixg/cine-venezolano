@@ -10,5 +10,5 @@ argon2-cffi>=23.1,<26
 itsdangerous>=2.2,<3
 apscheduler>=3.11,<4
 pytest>=8.3,<9
-pytest-cov>=6,<7
+pytest-cov>=7.1.0,<8
 ruff>=0.9,<1
