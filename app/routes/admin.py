@@ -12,9 +12,22 @@ from app.database import get_db
 from app.models import Credit, Genre, SyncRun, Tag, Work
 from app.scheduler import run_configured_sync
 from app.services.classifier import CONTENT_LABELS, LENGTH_LABELS, slugify
+from app.services.llm_catalog import CatalogSuggestionError, suggest_work_metadata
 
 router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory="app/templates")
+
+
+def _edit_context(request: Request, work: Work, **extra: object) -> dict[str, object]:
+    context: dict[str, object] = {
+        "work": work,
+        "content_labels": CONTENT_LABELS,
+        "length_labels": LENGTH_LABELS,
+        "csrf_token": csrf_token(request),
+        "openrouter_configured": bool(settings.openrouter_api_key),
+    }
+    context.update(extra)
+    return context
 
 
 def _run_sync() -> None:
@@ -137,12 +150,44 @@ def edit_page(request: Request, work_id: int, db: Session = Depends(get_db)) -> 
     return templates.TemplateResponse(
         request,
         "admin/edit.html",
-        {
-            "work": work,
-            "content_labels": CONTENT_LABELS,
-            "length_labels": LENGTH_LABELS,
-            "csrf_token": csrf_token(request),
-        },
+        _edit_context(request, work),
+    )
+
+
+@router.post("/works/{work_id}/suggest", response_class=HTMLResponse)
+def suggest_edit_metadata(
+    request: Request,
+    work_id: int,
+    csrf: str = Form(...),
+    db: Session = Depends(get_db),
+) -> HTMLResponse:
+    require_admin(request)
+    validate_csrf(request, csrf)
+    work = db.scalar(
+        select(Work)
+        .options(
+            joinedload(Work.source),
+            selectinload(Work.genres),
+            selectinload(Work.tags),
+            selectinload(Work.credits),
+        )
+        .where(Work.id == work_id)
+    )
+    if not work:
+        raise HTTPException(status_code=404, detail="Obra no encontrada")
+    try:
+        suggestion = suggest_work_metadata(work)
+    except CatalogSuggestionError as exc:
+        return templates.TemplateResponse(
+            request,
+            "admin/edit.html",
+            _edit_context(request, work, ai_error=str(exc)),
+            status_code=503,
+        )
+    return templates.TemplateResponse(
+        request,
+        "admin/edit.html",
+        _edit_context(request, work, suggestion=suggestion, ai_status="ready"),
     )
 
 

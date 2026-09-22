@@ -3,32 +3,24 @@
 {% block content %}
 <section class="admin-wrap admin-edit">
   <a class="back-link" href="/admin">← Volver al panel</a>
-  <div class="admin-heading"><div><p class="kicker">Ficha editorial</p><h1>{{ work.title }}</h1></div><a class="button button--ghost" href="/obras/{{ work.slug }}" target="_blank">Ver ficha ↗</a></div>
-  {% if request.query_params.get('saved') %}<p class="notice notice--success">Cambios guardados.</p>{% endif %}
-  <form class="panel edit-form" method="post">
-    <input type="hidden" name="csrf" value="{{ csrf_token }}">
-    <div class="source-note"><strong>Fuente:</strong> {{ work.source.title if work.source else work.youtube_id }}. Los campos editoriales no son sobrescritos por YouTube.</div>
-    <div class="form-grid">
-      <label>Título editorial<input name="title" value="{{ work.title_override or '' }}" placeholder="{{ work.source.title if work.source else '' }}"></label>
-      <label>Título original<input name="original_title" value="{{ work.original_title or '' }}"></label>
-      <label class="full">Sinopsis<textarea name="synopsis" rows="5">{{ work.synopsis or '' }}</textarea></label>
-      <label>Año<input name="year" inputmode="numeric" value="{{ work.year or '' }}"></label>
-      <label>País<input name="country" value="{{ work.country }}"></label>
-      <label>Idioma<input name="language" value="{{ work.language or '' }}"></label>
-      <label>Subtítulos<input name="subtitles" value="{{ work.subtitles or '' }}"></label>
-      <label>Tipo<select name="content_type">{% for value, label in content_labels.items() %}<option value="{{ value }}" {% if work.content_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
-      <label>Duración<select name="length_category">{% for value, label in length_labels.items() %}<option value="{{ value }}" {% if work.length_category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
-      <label class="full">Géneros <small>separados por comas</small><input name="genres" value="{{ work.genres|map(attribute='name')|join(', ') }}"></label>
-      <label class="full">Etiquetas <small>separadas por comas</small><input name="tags" value="{{ work.tags|map(attribute='name')|join(', ') }}"></label>
-      <label class="full">Dirección <small>nombres separados por comas</small><input name="directors" value="{{ work.credits|selectattr('role', 'equalto', 'Dirección')|map(attribute='name')|join(', ') }}"></label>
-      <label class="full">Reparto <small>nombres separados por comas</small><input name="cast" value="{{ work.credits|selectattr('role', 'equalto', 'Reparto')|map(attribute='name')|join(', ') }}"></label>
-    </div>
-    <div class="checkboxes">
-      <label><input type="checkbox" name="is_published" {% if work.is_published %}checked{% endif %}> Publicada</label>
-      <label><input type="checkbox" name="reviewed" {% if not work.needs_review %}checked{% endif %}> Revisión completada</label>
-    </div>
-    <button class="button button--primary" type="submit">Guardar cambios</button>
-  </form>
+  <div class="admin-heading"><div><p class="kicker">Ficha editorial / {{ work.youtube_id }}</p><h1>{{ work.title }}</h1></div><a class="button button--ghost" href="/obras/{{ work.slug }}" target="_blank">Ver ficha ↗</a></div>
+  {% if request.query_params.get('saved') %}<p class="notice notice--success">Cambios guardados.</p>{% endif %}{% if ai_error %}<p class="notice notice--error">{{ ai_error }}</p>{% endif %}
+  <div class="edit-layout">
+    <form class="panel edit-form" method="post" action="/admin/works/{{ work.id }}" data-editor-form><input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <section class="edit-section"><div class="edit-section__heading"><span>01</span><div><h2>Identidad</h2><p>El nombre y la descripción que verá el público.</p></div></div><div class="form-grid">
+        <label>Título editorial<input name="title" value="{{ work.title_override or '' }}" placeholder="{{ work.source.title if work.source else '' }}"></label><label>Título original<input name="original_title" value="{{ work.original_title or '' }}"></label><label class="full">Sinopsis<textarea name="synopsis" rows="6">{{ work.synopsis or '' }}</textarea><small>Escribe una sinopsis propia cuando la descripción de YouTube no sea suficiente.</small></label>
+      </div></section>
+      <section class="edit-section"><div class="edit-section__heading"><span>02</span><div><h2>Clasificación</h2><p>Campos que alimentan la búsqueda y las colecciones.</p></div></div><div class="form-grid">
+        <label>Tipo<select name="content_type">{% for value, label in content_labels.items() %}<option value="{{ value }}" {% if work.content_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label><label>Duración<select name="length_category">{% for value, label in length_labels.items() %}<option value="{{ value }}" {% if work.length_category == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label><label>Año<input name="year" inputmode="numeric" value="{{ work.year or '' }}"></label><label>País<input name="country" value="{{ work.country }}"></label><label>Idioma<input name="language" value="{{ work.language or '' }}"></label><label>Subtítulos<input name="subtitles" value="{{ work.subtitles or '' }}"></label><label class="full">Géneros <small>separados por comas</small><input name="genres" value="{{ work.genres|map(attribute='name')|join(', ') }}"></label><label class="full">Etiquetas <small>separadas por comas</small><input name="tags" value="{{ work.tags|map(attribute='name')|join(', ') }}"></label>
+      </div></section>
+      <section class="edit-section"><div class="edit-section__heading"><span>03</span><div><h2>Créditos</h2><p>Personas identificadas en la fuente o por la curaduría.</p></div></div><div class="form-grid"><label class="full">Dirección <small>nombres separados por comas</small><input name="directors" value="{{ work.credits|selectattr('role', 'equalto', 'Dirección')|map(attribute='name')|join(', ') }}"></label><label class="full">Reparto <small>nombres separados por comas</small><input name="cast" value="{{ work.credits|selectattr('role', 'equalto', 'Reparto')|map(attribute='name')|join(', ') }}"></label></div></section>
+      <section class="edit-section edit-section--last"><div class="edit-section__heading"><span>04</span><div><h2>Publicación</h2><p>Control editorial antes de mostrar la ficha.</p></div></div><div class="checkboxes"><label><input type="checkbox" name="is_published" {% if work.is_published %}checked{% endif %}> Publicada</label><label><input type="checkbox" name="reviewed" {% if not work.needs_review %}checked{% endif %}> Revisión completada</label></div></section>
+      <div class="editor-actions"><button class="button button--primary" type="submit">Guardar ficha</button><a class="button button--ghost" href="/obras/{{ work.slug }}" target="_blank">Abrir ficha ↗</a></div>
+    </form>
+    <aside class="edit-aside"><div class="source-note"><p class="kicker">Fuente primaria</p><h2>{{ work.source.title if work.source else work.title }}</h2><p>{{ work.source.channel_title if work.source else 'YouTube' }}</p><a href="https://www.youtube.com/watch?v={{ work.youtube_id }}" target="_blank" rel="noopener">Ver en YouTube ↗</a>{% if work.source and work.source.description %}<details><summary>Descripción original</summary><p>{{ work.source.description }}</p></details>{% endif %}</div>
+      <div class="ai-assistant"><p class="kicker">Asistente editorial</p><h2>Proponer metadata</h2><p>OpenRouter analiza título, descripción, duración y campos actuales. La propuesta nunca se guarda automáticamente.</p>{% if openrouter_configured %}<form method="post" action="/admin/works/{{ work.id }}/suggest"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="button button--secondary" type="submit">Analizar con IA</button></form>{% else %}<p class="field-help">Configura <code>OPENROUTER_API_KEY</code> para habilitarlo.</p>{% endif %}</div>
+      {% if suggestion %}<div class="ai-suggestion" data-ai-suggestion data-suggestion="{{ suggestion|tojson|forceescape }}"><div class="ai-suggestion__meta"><span>Propuesta lista</span><strong>{{ (suggestion.confidence * 100)|round|int }}% confianza</strong></div><p>{{ suggestion.rationale }}</p><dl><div><dt>Tipo</dt><dd>{{ content_labels.get(suggestion.content_type, suggestion.content_type) }}</dd></div><div><dt>Duración</dt><dd>{{ length_labels.get(suggestion.length_category, suggestion.length_category) }}</dd></div><div><dt>Géneros</dt><dd>{{ suggestion.genres|join(', ') or '—' }}</dd></div><div><dt>Etiquetas</dt><dd>{{ suggestion.tags|join(', ') or '—' }}</dd></div></dl><button class="button button--secondary ai-apply" type="button" data-ai-apply>Cargar propuesta en el formulario</button><p class="field-help" data-ai-note>Revisa cada campo y guarda cuando estés conforme.</p></div>{% endif %}
+    </aside>
+  </div>
 </section>
 {% endblock %}
-

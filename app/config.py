@@ -21,6 +21,9 @@ class Settings:
         "YOUTUBE_PLAYLIST_ID", "PLVQ42obHL2u_nJgblVTpWs3NQdD_WZkAM"
     )
     youtube_api_key: str = os.getenv("YOUTUBE_API_KEY", "")
+    openrouter_api_key: str = os.getenv("OPENROUTER_API_KEY", "")
+    openrouter_model: str = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+    openrouter_timeout: float = float(os.getenv("OPENROUTER_TIMEOUT", "45"))
     admin_password_hash: str = os.getenv("ADMIN_PASSWORD_HASH", "")
     session_secret: str = os.getenv("SESSION_SECRET", "development-only-change-me")
     session_https_only: bool = _as_bool(os.getenv("SESSION_HTTPS_ONLY"), False)

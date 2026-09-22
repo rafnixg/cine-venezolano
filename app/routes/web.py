@@ -3,7 +3,7 @@ from __future__ import annotations
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -16,6 +16,31 @@ from app.services.classifier import CONTENT_LABELS, LENGTH_LABELS
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+@router.get("/robots.txt", response_class=PlainTextResponse, include_in_schema=False)
+def robots() -> str:
+    return "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: /sitemap.xml\n"
+
+
+@router.get("/llm.txt", response_class=PlainTextResponse, include_in_schema=False)
+@router.get("/llms.txt", response_class=PlainTextResponse, include_in_schema=False)
+def llm_info() -> str:
+    return (
+        "# Cine Venezolano\n\n"
+        "Catálogo editorial de cine venezolano disponible en YouTube.\n\n"
+        "## Uso\n"
+        "Consulta las fichas públicas en /obras/{slug}. Los videos se reproducen desde YouTube.\n"
+        "La playlist original y la curaduría pertenecen a Daniela Carrión.\n\n"
+        "## API\n"
+        "La API pública está documentada en /docs y ofrece /api/v1/works y /api/v1/facets.\n"
+    )
+
+
+@router.get("/sitemap.xml", response_class=Response, include_in_schema=False)
+def sitemap() -> Response:
+    body = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>/</loc></url></urlset>'
+    return Response(content=body, media_type="application/xml")
 
 
 def _optional_year(value: str | None) -> int | None:

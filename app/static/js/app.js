@@ -1,4 +1,24 @@
 document.addEventListener("click", (event) => {
+  const aiButton = event.target.closest("[data-ai-apply]");
+  if (aiButton) {
+    const container = aiButton.closest("[data-ai-suggestion]");
+    const form = document.querySelector("[data-editor-form]");
+    try {
+      const suggestion = JSON.parse(container.dataset.suggestion);
+      ["title", "original_title", "synopsis", "year", "country", "language", "subtitles", "content_type", "length_category"].forEach((name) => {
+        const field = form?.elements.namedItem(name);
+        if (field) field.value = suggestion[name] ?? "";
+      });
+      ["genres", "tags", "directors", "cast"].forEach((name) => {
+        const field = form?.elements.namedItem(name);
+        if (field) field.value = (suggestion[name] || []).join(", ");
+      });
+      aiButton.textContent = "Propuesta cargada ✓";
+      container.querySelector("[data-ai-note]").textContent = "Ahora revisa los campos antes de guardar.";
+    } catch (_error) { aiButton.textContent = "No se pudo cargar la propuesta"; }
+    return;
+  }
+
   const copyButton = event.target.closest("[data-copy-link]");
   if (copyButton) {
     navigator.clipboard.writeText(window.location.href).then(() => {

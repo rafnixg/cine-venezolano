@@ -31,7 +31,7 @@ La aplicación organiza y presenta esa selección, pero no reclama autoría sobr
    python -m pip install -r requirements.txt
    ```
 
-2. Copia `.env.example` como `.env` y configura `YOUTUBE_API_KEY`, `SESSION_SECRET` y `ADMIN_PASSWORD_HASH`. Genera el hash sin guardar la contraseña en el historial:
+2. Copia `.env.example` como `.env` y configura `YOUTUBE_API_KEY`, `SESSION_SECRET` y `ADMIN_PASSWORD_HASH`. Opcionalmente añade `OPENROUTER_API_KEY` para activar propuestas de metadata en el editor; se revisan y guardan manualmente. Genera el hash sin guardar la contraseña en el historial:
 
    ```powershell
    python -m app.cli hash-password
@@ -77,6 +77,8 @@ la versión correspondiente, por ejemplo `1.2.0` y `1.2` para `v1.2.0`.
 - `python -m pytest`: ejecuta las pruebas.
 - `python -m ruff check .`: valida estilo y errores estáticos.
 - `alembic upgrade head`: aplica migraciones pendientes.
+
+El sitio publica `robots.txt`, `llm.txt`/`llms.txt` y `sitemap.xml` para facilitar el descubrimiento automatizado sin exponer el panel editorial.
 
 ## Integración continua
 

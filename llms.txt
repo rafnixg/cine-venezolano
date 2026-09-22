@@ -1,0 +1,11 @@
+# Cine Venezolano
+
+Catálogo editorial de películas, cortometrajes y documentales venezolanos disponibles en YouTube.
+
+- Sitio: /
+- Fichas: /obras/{slug}
+- API pública: /api/v1/works
+- Facetas: /api/v1/facets
+- Documentación API: /docs
+
+La playlist original y la curaduría pertenecen a Daniela Carrión. Los videos se reproducen desde sus respectivos canales de YouTube.
