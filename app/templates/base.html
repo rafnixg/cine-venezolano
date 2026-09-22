@@ -4,7 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Catálogo curado de películas, cortometrajes y documentales venezolanos disponibles en YouTube.">
+  <meta name="author" content="Cine Venezolano">
+  <meta name="keywords" content="cine venezolano, películas venezolanas, cortometrajes venezolanos, documentales venezolanos, cine en YouTube">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#151310">
   <title>{% block title %}Cine Venezolano{% endblock %}</title>
+  <link rel="canonical" href="{{ request.url.scheme }}://{{ request.url.netloc }}{{ request.url.path }}">
+  <meta property="og:locale" content="es_VE">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Cine Venezolano">
+  <meta property="og:title" content="{% block og_title %}Cine Venezolano — Catálogo de cine venezolano{% endblock %}">
+  <meta property="og:description" content="Catálogo curado de películas, cortometrajes y documentales venezolanos disponibles en YouTube.">
+  <meta property="og:url" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ request.url.path }}">
+  <meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
+  <meta property="og:image:width" content="1536">
+  <meta property="og:image:height" content="864">
+  <meta property="og:image:alt" content="Collage editorial sobre cine venezolano">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}Cine Venezolano — Catálogo de cine venezolano{% endblock %}">
+  <meta name="twitter:description" content="Películas, cortometrajes y documentales venezolanos disponibles en YouTube.">
+  <meta name="twitter:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
+  <script type="application/ld+json">{{ {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Cine Venezolano",
+    "url": request.url.scheme ~ "://" ~ request.url.netloc,
+    "description": "Catálogo curado de películas, cortometrajes y documentales venezolanos disponibles en YouTube.",
+    "inLanguage": "es-VE",
+    "sameAs": ["https://www.youtube.com/playlist?list=PLVQ42obHL2u_nJgblVTpWs3NQdD_WZkAM", "https://github.com/rafnixg/cine-venezolano"]
+  } | tojson }}</script>
   <link rel="icon" href="{{ url_for('static', path='/favicon.svg') }}" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
