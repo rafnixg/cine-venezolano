@@ -16,14 +16,14 @@
   <meta property="og:title" content="{% block og_title %}Cine Venezolano — Catálogo de cine venezolano{% endblock %}">
   <meta property="og:description" content="Catálogo curado de películas, cortometrajes y documentales venezolanos disponibles en YouTube.">
   <meta property="og:url" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ request.url.path }}">
-  <meta property="og:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
+  <meta property="og:image" content="{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
   <meta property="og:image:width" content="1536">
   <meta property="og:image:height" content="864">
-  <meta property="og:image:alt" content="Collage editorial sobre cine venezolano">
+  <meta property="og:image:alt" content="Cine Venezolano — Archivo audiovisual abierto">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{% block twitter_title %}Cine Venezolano — Catálogo de cine venezolano{% endblock %}">
   <meta name="twitter:description" content="Películas, cortometrajes y documentales venezolanos disponibles en YouTube.">
-  <meta name="twitter:image" content="{{ request.url.scheme }}://{{ request.url.netloc }}{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
+  <meta name="twitter:image" content="{{ url_for('static', path='/seo/cine-venezolano-og.png') }}">
   <script type="application/ld+json">{{ {
     "@context": "https://schema.org",
     "@type": "WebSite",
